@@ -1,0 +1,97 @@
+<div class="topbar">
+  <div class="container d-flex align-items-center justify-content-between py-3">
+    <div class="brand"><span class="brand-icon">EM</span><div><div class="brand-title">PeopleDesk</div><div class="brand-subtitle">Employee Management System</div></div></div>
+    <span class="badge rounded-pill text-bg-light border">Admin workspace</span>
+  </div>
+</div>
+
+<main class="container py-4 py-lg-5">
+  <section class="hero mb-4">
+    <div>
+      <div class="eyebrow">WORKFORCE OVERVIEW</div>
+      <h1>Employee directory</h1>
+      <p>Manage your team information in one simple place.</p>
+    </div>
+    <div class="hero-stat"><span>Total employees</span><strong>{{ employees.length }}</strong></div>
+  </section>
+
+  <div *ngIf="message" class="alert alert-success alert-dismissible" role="alert">
+    {{ message }} <button type="button" class="btn-close" aria-label="Close" (click)="message = ''"></button>
+  </div>
+  <div *ngIf="error" class="alert alert-danger alert-dismissible" role="alert">
+    {{ error }} <button type="button" class="btn-close" aria-label="Close" (click)="error = ''"></button>
+  </div>
+
+  <section class="card app-card mb-4">
+    <div class="card-header-custom">
+      <div><h2>{{ editingId === null ? 'Add an employee' : 'Edit employee' }}</h2><p>Enter the employee details below.</p></div>
+      <span class="step-pill">{{ editingId === null ? 'NEW RECORD' : 'EDITING #' + editingId }}</span>
+    </div>
+    <form #employeeForm="ngForm" (ngSubmit)="submit(employeeForm)" novalidate>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="firstName" class="form-label">First name</label>
+          <input id="firstName" class="form-control" name="firstName" [(ngModel)]="form.firstName" required maxlength="60" #firstName="ngModel" placeholder="e.g. Ayesha">
+          <div class="field-error" *ngIf="firstName.invalid && firstName.touched">First name is required.</div>
+        </div>
+        <div class="col-md-6">
+          <label for="lastName" class="form-label">Last name</label>
+          <input id="lastName" class="form-control" name="lastName" [(ngModel)]="form.lastName" required maxlength="60" #lastName="ngModel" placeholder="e.g. Khan">
+          <div class="field-error" *ngIf="lastName.invalid && lastName.touched">Last name is required.</div>
+        </div>
+        <div class="col-md-6">
+          <label for="email" class="form-label">Email address</label>
+          <input id="email" type="email" class="form-control" name="email" [(ngModel)]="form.email" required email maxlength="120" #email="ngModel" placeholder="name@company.com">
+          <div class="field-error" *ngIf="email.invalid && email.touched">Enter a valid email address.</div>
+        </div>
+        <div class="col-md-6">
+          <label for="department" class="form-label">Department</label>
+          <select id="department" class="form-select" name="department" [(ngModel)]="form.department" required #department="ngModel">
+            <option value="" disabled>Select department</option>
+            <option>Engineering</option><option>Human Resources</option><option>Finance</option><option>Marketing</option><option>Sales</option><option>Operations</option><option>Support</option><option>Other</option>
+          </select>
+          <div class="field-error" *ngIf="department.invalid && department.touched">Choose a department.</div>
+        </div>
+        <div class="col-md-6">
+          <label for="salary" class="form-label">Annual salary (₹)</label>
+          <input id="salary" type="number" class="form-control" name="salary" [(ngModel)]="form.salary" required min="0" #salary="ngModel">
+          <div class="field-error" *ngIf="salary.invalid && salary.touched">Salary must be zero or more.</div>
+        </div>
+      </div>
+      <div class="form-actions mt-4">
+        <button class="btn btn-primary px-4" type="submit" [disabled]="saving">{{ saving ? 'Saving…' : (editingId === null ? '＋ Add employee' : 'Save changes') }}</button>
+        <button class="btn btn-outline-secondary px-4" type="button" (click)="resetForm(employeeForm)">Clear</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card app-card">
+    <div class="directory-heading">
+      <div><h2>Team members</h2><p>{{ employees.length }} record(s) shown</p></div>
+      <form class="search-box" (ngSubmit)="searchEmployees()">
+        <span aria-hidden="true">⌕</span>
+        <input class="form-control" name="search" [(ngModel)]="search" placeholder="Search name, email, department…">
+        <button class="btn btn-dark" type="submit">Search</button>
+      </form>
+    </div>
+    <div *ngIf="loading" class="empty-state">Loading employees…</div>
+    <div *ngIf="!loading && employees.length === 0" class="empty-state">
+      <div class="empty-icon">◎</div><h3>No employees found</h3><p>Add an employee above or try a different search.</p>
+    </div>
+    <div class="table-responsive" *ngIf="!loading && employees.length > 0">
+      <table class="table align-middle employee-table mb-0">
+        <thead><tr><th>EMPLOYEE</th><th>DEPARTMENT</th><th>EMAIL</th><th>SALARY</th><th class="text-end">ACTIONS</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let employee of employees">
+            <td><div class="person-cell"><span class="avatar">{{ employee.firstName.charAt(0) }}{{ employee.lastName.charAt(0) }}</span><div><strong>{{ employee.firstName }} {{ employee.lastName }}</strong><small>EMP-{{ employee.id }}</small></div></div></td>
+            <td><span class="department-tag">{{ employee.department }}</span></td>
+            <td class="email-cell">{{ employee.email }}</td>
+            <td class="salary-cell">{{ employee.salary | currency:'INR':'symbol':'1.0-0' }}</td>
+            <td class="text-end action-cell"><button class="btn btn-sm btn-light me-1" type="button" (click)="edit(employee)">Edit</button><button class="btn btn-sm btn-outline-danger" type="button" (click)="deleteEmployee(employee)">Delete</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <footer>PeopleDesk · Employee Management System</footer>
+</main>
